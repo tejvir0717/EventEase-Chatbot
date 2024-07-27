@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category.name }} Events</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="text-center">{{ category.name }} Events</h2>
+    <br>
+    <div class="mb-3">
+        <a href="{% url 'create_event' %}" class="btn btn-primary">Add New Event</a>
+        <a href="{% url 'category_list' %}" class="btn btn-secondary ms-2">Back to Categories</a>
+    </div>
+    <table id="eventTable" class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Start Date</th>
+                <th>Priority <button class="btn btn-link" onclick="sortByPriority()">▲</button></th>
+                <th>Participants</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td>{{ event.id }}</td>
+                <td>{{ event.name }}</td>
+                <td>{{ event.start_date|date:"Y-m-d H:i" }}</td>
+                <td>{{ event.priority }}</td>
+                <td>{{ event.participants }}</td>
+                <td>
+                    <a href="{% url 'update_event' event.id %}" class="btn btn-primary btn-sm">Update</a>
+                    <form method="post" action="{% url 'delete_event' event.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#eventModal_{{ event.id }}">Details</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal for event details -->
+{% for event in events %}
+    <div class="modal fade" id="eventModal_{{ event.id }}" tabindex="-1" aria-labelledby="eventModalLabel_{{ event.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel_{{ event.id }}">{{ event.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body event">
+                    <p id="event-id"><strong>ID:</strong> {{ event.id }}</p>
+                    <p id="event-name"><strong>Name:</strong> {{ event.name }}</p>
+                    <p id="event-category"><strong>Category:</strong> {{ event.category.name }}</p>
+                    <p id="event-start-date"><strong>Start Date:</strong> {{ event.start_date|date:"Y-m-d H:i" }}</p>
+                    <p id="event-end-date"><strong>End Date:</strong> {{ event.end_date|date:"Y-m-d H:i" }}</p>
+                    <p id="event-priority"><strong>Priority:</strong> {{ event.priority }}</p>
+                    <p id="event-participants"><strong>Participants:</strong> {{ event.participants }}</p>
+                    <p id="event-description"><strong>Description:</strong> {{ event.description|default:"N/A" }}</p>
+                    <p id="event-location"><strong>Location:</strong> {{ event.location|default:"N/A" }}</p>
+                    <p id="event-organizer"><strong>Organizer:</strong> {{ event.organizer|default:"N/A" }}</p>
+                </div>
+
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+<!-- JavaScript for sorting by priority -->
+<script>
+    function sortByPriority() {
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.getElementById("eventTable");
+        switching = true;
+        while (switching) {
+            switching = false;
+            rows = table.getElementsByTagName("tr");
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("td")[4];  // Updated index to 4 for priority column
+                y = rows[i + 1].getElementsByTagName("td")[4];
+                if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
+</script>
+
+<!-- Bootstrap 5 JS Bundle (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

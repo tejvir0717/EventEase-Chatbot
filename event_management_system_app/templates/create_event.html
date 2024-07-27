@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if event %}Edit Event{% else %}Add Event{% endif %}</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">{% if event %}Edit Event{% else %}Add Event{% endif %}</h2>
+        <br>
+        <form method="post" action="{% if event %}{% url 'update_event' event.id %}{% else %}{% url 'create_event' %}{% endif %}" onsubmit="return validateForm()">
+            {% csrf_token %}
+            {% if event %}
+            <input type="hidden" name="id" value="{{ event.id }}">
+            {% endif %}
+            <div class="form-group">
+                <label for="eventName">Event Name:</label>
+                <input type="text" class="form-control" id="eventName" name="name" placeholder="Enter event name" required value="{{ event.name|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label for="eventCategory">Category:</label>
+                <select class="form-control" id="eventCategory" name="category" required>
+                    <option value="">Select category</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if event and event.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="startDate">Start Date:</label>
+                <input type="datetime-local" class="form-control" id="startDate" name="start_date" required value="{{ event.start_date|date:'Y-m-d\TH:i'|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input type="datetime-local" class="form-control" id="endDate" name="end_date" required value="{{ event.end_date|date:'Y-m-d\TH:i'|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label for="priority">Priority:</label>
+                <input type="number" class="form-control" id="priority" name="priority" min="1" value="{{ event.priority|default:'1' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ event.description|default:'' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" class="form-control" id="location" name="location" placeholder="Enter event location" value="{{ event.location|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label for="organizer">Organizer:</label>
+                <input type="text" class="form-control" id="organizer" name="organizer" placeholder="Enter event organizer" value="{{ event.organizer|default:'' }}">
+            </div>
+            <button type="submit" class="btn btn-primary">{% if event %}Update{% else %}Submit{% endif %}</button>
+        </form>
+    </div>
+    <!-- Bootstrap JS (Optional - for certain Bootstrap features like dropdowns, modals, etc.) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function validateForm() {
+            var startDate = document.getElementById("startDate").value;
+            var endDate = document.getElementById("endDate").value;
+            if (new Date(startDate) >= new Date(endDate)) {
+                alert("End date must be after the start date.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>
